@@ -8,6 +8,7 @@ import (
 	"path/filepath"
 	"sort"
 	"strconv"
+	"strings"
 
 	"github.com/jung-kurt/gofpdf"
 )
@@ -35,38 +36,47 @@ func SaveImage(url string, folderName string, dataIndex int) error {
 }
 
 func GeneratePDF(folderName, title string) error {
-	pdfFolder := "manga-pdf/pdf"
-	os.MkdirAll(pdfFolder, os.ModePerm)
+    pdfFolder := "manga-pdf/pdf"
+    os.MkdirAll(pdfFolder, os.ModePerm)
 
-	pdf := gofpdf.New("P", "mm", "A4", "")
-	imageFiles, err := os.ReadDir(folderName)
-	if err != nil {
-		return err
-	}
+    pdf := gofpdf.New("P", "mm", "A4", "")
+    imageFiles, err := os.ReadDir(folderName)
+    if err != nil {
+        return err
+    }
 
-	var orderedFiles []string
-	for _, file := range imageFiles {
-		if !file.IsDir() {
-			orderedFiles = append(orderedFiles, file.Name())
-		}
-	}
+    var orderedFiles []string
+    for _, file := range imageFiles {
+        if !file.IsDir() {
+            orderedFiles = append(orderedFiles, file.Name())
+        }
+    }
 
-	sort.Slice(orderedFiles, func(i, j int) bool {
-		iIndex, _ := strconv.Atoi(orderedFiles[i][:len(orderedFiles[i])-4])
-		jIndex, _ := strconv.Atoi(orderedFiles[j][:len(orderedFiles[j])-4])
-		return iIndex < jIndex
-	})
+    // Sort the images based on their numeric index in the filename
+    sort.Slice(orderedFiles, func(i, j int) bool {
+        iIndex, _ := strconv.Atoi(orderedFiles[i][:len(orderedFiles[i])-4])
+        jIndex, _ := strconv.Atoi(orderedFiles[j][:len(orderedFiles[j])-4])
+        return iIndex < jIndex
+    })
 
-	for _, filename := range orderedFiles {
-		imgPath := filepath.Join(folderName, filename)
-		pdf.AddPage()
-		pdf.Image(imgPath, 10, 10, 190, 0, false, "", 0, "")
-	}
+    // Add images to the PDF
+    for _, filename := range orderedFiles {
+        imgPath := filepath.Join(folderName, filename)
+        pdf.AddPage()
+        pdf.Image(imgPath, 10, 10, 190, 0, false, "", 0, "")
+    }
 
-	pdfFilePath := fmt.Sprintf("%s/%s.pdf", pdfFolder, title)
-	if err := pdf.OutputFileAndClose(pdfFilePath); err != nil {
-		return err
-	}
+    // Replace all spaces in the title with underscores for the PDF filename
+    newTitle := strings.ReplaceAll(title, " ", "_")
+	// lets print the new title
+	fmt.Println(newTitle)
+    pdfFilePath := filepath.Join(pdfFolder, newTitle + ".pdf") // Ensure path construction is correct
 
-	return os.RemoveAll(folderName)
+    // Output the PDF file
+    if err := pdf.OutputFileAndClose(pdfFilePath); err != nil {
+        return err
+    }
+
+    // Clean up: remove the folder with images after PDF generation
+    return os.RemoveAll(folderName)
 }

@@ -1,5 +1,7 @@
 # Manga Scraper API
 
+![Cover Image](./cover.png)
+
 A simple API for scraping manga chapters from websites and generating PDF files from the scraped images.
 
 ## Features

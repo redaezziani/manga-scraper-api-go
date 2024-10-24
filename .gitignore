@@ -1,0 +1,15 @@
+.env
+
+images/
+manga-pdf/
+
+*.exe
+*.exe~
+*.out
+*.o
+*.a
+
+*.log
+*.tmp
+*.bak
+*.swp

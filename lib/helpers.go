@@ -36,41 +36,41 @@ func SaveImage(url string, folderName string, dataIndex int) error {
 }
 
 func GeneratePDF(folderName, title string) error {
-    pdfFolder := "manga-pdf/pdf"
-    os.MkdirAll(pdfFolder, os.ModePerm)
+	pdfFolder := "manga-pdf/pdf"
+	os.MkdirAll(pdfFolder, os.ModePerm)
 
-    pdf := gofpdf.New("P", "mm", "A4", "")
-    imageFiles, err := os.ReadDir(folderName)
-    if err != nil {
-        return err
-    }
+	pdf := gofpdf.New("P", "mm", "A4", "")
+	imageFiles, err := os.ReadDir(folderName)
+	if err != nil {
+		return err
+	}
 
-    var orderedFiles []string
-    for _, file := range imageFiles {
-        if !file.IsDir() {
-            orderedFiles = append(orderedFiles, file.Name())
-        }
-    }
+	var orderedFiles []string
+	for _, file := range imageFiles {
+		if !file.IsDir() {
+			orderedFiles = append(orderedFiles, file.Name())
+		}
+	}
 
-    sort.Slice(orderedFiles, func(i, j int) bool {
-        iIndex, _ := strconv.Atoi(orderedFiles[i][:len(orderedFiles[i])-4])
-        jIndex, _ := strconv.Atoi(orderedFiles[j][:len(orderedFiles[j])-4])
-        return iIndex < jIndex
-    })
+	sort.Slice(orderedFiles, func(i, j int) bool {
+		iIndex, _ := strconv.Atoi(orderedFiles[i][:len(orderedFiles[i])-4])
+		jIndex, _ := strconv.Atoi(orderedFiles[j][:len(orderedFiles[j])-4])
+		return iIndex < jIndex
+	})
 
-    for _, filename := range orderedFiles {
-        imgPath := filepath.Join(folderName, filename)
-        pdf.AddPage()
-        pdf.Image(imgPath, 10, 10, 190, 0, false, "", 0, "")
-    }
+	for _, filename := range orderedFiles {
+		imgPath := filepath.Join(folderName, filename)
+		pdf.AddPage()
+		pdf.Image(imgPath, 10, 10, 190, 0, false, "", 0, "")
+	}
 
-    newTitle := strings.ReplaceAll(title, " ", "_")
+	newTitle := strings.ReplaceAll(title, " ", "_")
 	fmt.Println(newTitle)
-    pdfFilePath := filepath.Join(pdfFolder, newTitle + ".pdf") 
+	pdfFilePath := filepath.Join(pdfFolder, newTitle + ".pdf") 
 
-    if err := pdf.OutputFileAndClose(pdfFilePath); err != nil {
-        return err
-    }
+	if err := pdf.OutputFileAndClose(pdfFilePath); err != nil {
+		return err
+	}
 
-    return os.RemoveAll(folderName)
+	return os.RemoveAll(folderName)
 }
